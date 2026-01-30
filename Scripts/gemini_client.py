@@ -37,30 +37,50 @@ def extract_json(text):
     return json.loads(cleaned)
 
 def generate_test_cases(story):
-
     cleaned = clean_acceptance_criteria(story["acceptance"])
     formatted = format_acceptance_for_prompt(cleaned)
 
     prompt = f"""
 You are a senior QA engineer.
-Generate PURE JSON only.
-DO NOT write explanations.
-DO NOT write markdown.
-JSON array only.
 
-Acceptance Criteria:
+Return **ONLY** a JSON array (no markdown, no backticks, no explanations).
+Each element MUST match this schema:
+
+- title: string
+- type: string  # one of: "positive" | "negative" | "edge" (if unsure, use "positive")
+- steps: string[]  # array of plain text steps; DO NOT return objects in this array
+- expected: string
+
+Acceptance Criteria (Gherkin-like text):
 {formatted}
 
-Your JSON array must contain objects with:
-"title", "type", "steps", "expected".
+Example of the EXACT shape to return:
+[
+  {{
+    "title": "User can sign in with valid credentials",
+    "type": "positive",
+    "steps": [
+      "Open the login page",
+      "Enter a registered email",
+      "Enter a valid password",
+      "Click Sign in"
+    ],
+    "expected": "User is redirected to the dashboard"
+  }}
+]
 """
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
-
     body = { "contents": [{"parts": [{"text": prompt}]}] }
 
     res = requests.post(url, json=body)
     print("the ai agent response code is "+str(res.status_code))
-    text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
+
+    # Be defensive: the response can vary; add guards
+    j = res.json()
+    try:
+        text = j["candidates"][0]["content"]["parts"][0]["text"]
+    except (KeyError, IndexError) as e:
+        raise RuntimeError(f"Unexpected Gemini response shape: {json.dumps(j)[:1000]}") from e
 
     return extract_json(text)
