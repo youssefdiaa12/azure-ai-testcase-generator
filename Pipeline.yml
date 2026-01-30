@@ -8,7 +8,7 @@ schedules:
 
 
 pool:
-  vmImage: ubuntu-latest
+  name: 'Validation Agent'
 
 variables:
 - group: AI-Test-Generator-Vars
