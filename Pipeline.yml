@@ -1,11 +1,12 @@
 trigger: none
 
-
 schedules:
-- cron: "0 16 * * *"
+- cron: "0 16 * * *"              # Runs at 16:00 UTC = 18:00 Egypt time
   displayName: Daily AI Test Generator (6 PM Egypt)
-  always: true
-
+  branches:
+    include:
+      - main                      # main branch runner
+  always: true                    # Run even if there are no recent changes
 
 pool:
   name: 'Validation Agent'
