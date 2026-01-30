@@ -1,11 +1,13 @@
-from azure_client import get_recent_user_stories, get_work_item_raw
-from hierarchy_manager import get_feature_and_epic
-from gemini_client import generate_test_cases
-from test_management import (
+
+#Adding them from scripts file
+from Scripts.azure_client import get_recent_user_stories, get_work_item_raw
+from Scripts.hierarchy_manager import get_feature_and_epic
+from Scripts.gemini_client import generate_test_cases
+from Scripts.test_management import (
     get_or_create_test_plan,
     get_or_create_suite
 )
-from testcase_creator import create_test_cases
+from Scripts.testcase_creator import create_test_cases
 
 
 stories = get_recent_user_stories()
@@ -26,5 +28,4 @@ for story in stories:
 
     ai_tests = generate_test_cases(story)
     t=t+1
-    print("the ai test for the user story " +str(t) + " is "+ str(ai_tests))
     create_test_cases(story, ai_tests, plan_id, suite_id)
