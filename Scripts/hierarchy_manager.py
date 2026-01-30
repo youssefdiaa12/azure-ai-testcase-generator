@@ -1,4 +1,4 @@
-from azure_client import get_work_item_raw
+from Scripts.azure_client import get_work_item_raw
 
 def get_parent(work_item,work_item_type=None):
 

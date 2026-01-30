@@ -4,7 +4,7 @@ import json
 import html
 import os
 
-API_KEY = os.getenv("GEMINI_TOKEN")
+API_KEY = os.getenv("GEMINI_API_KEY")
 
 def clean_acceptance_criteria(text: str) -> str:
     if not text:

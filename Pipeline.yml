@@ -1,16 +1,17 @@
 trigger: none
 
+
 schedules:
-- cron: "0 * * * *"
-  displayName: Hourly AI Traceable Test Generator
+- cron: "0 16 * * *"
+  displayName: Daily AI Test Generator (6 PM Egypt)
   always: true
+
 
 pool:
   vmImage: ubuntu-latest
 
 variables:
-  AZURE_ORG: "your-org"
-  AZURE_PROJECT: "your-project"
+- group: AI-Test-Generator-Vars
 
 steps:
 - task: UsePythonVersion@0
@@ -25,3 +26,6 @@ steps:
   env:
     AZURE_PAT: $(AZURE_PAT)
     GEMINI_API_KEY: $(GEMINI_API_KEY)
+    AZURE_ORG: $(AZURE_ORG)
+    AZURE_PROJECT: $(AZURE_PROJECT)
+    ASSIGNED_TO_EMAIL: $(AZURE_EMAIL)
