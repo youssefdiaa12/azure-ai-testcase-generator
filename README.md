@@ -56,7 +56,4 @@ Gemini AI is used to generate:
 - Azure Pipelines
 - WIQL Queries
 
----
-
-##  Project Structure
 
