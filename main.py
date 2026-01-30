@@ -27,5 +27,5 @@ for story in stories:
     suite_id = get_or_create_suite(plan_id, feature,plan_root_suite,story['id'])
 
     ai_tests = generate_test_cases(story)
-    t=t+1
+    print("ai test response is "+str(ai_tests))
     create_test_cases(story, ai_tests, plan_id, suite_id)

@@ -60,6 +60,7 @@ Your JSON array must contain objects with:
     body = { "contents": [{"parts": [{"text": prompt}]}] }
 
     res = requests.post(url, json=body)
+    print("the ai agent response code is "+str(res.status_code))
     text = res.json()["candidates"][0]["content"]["parts"][0]["text"]
 
     return extract_json(text)
