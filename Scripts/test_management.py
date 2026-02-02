@@ -66,8 +66,7 @@ def create_feature_suite(plan_id, name,feature_id,plan_root_suite):
 
     body= {
     "name": name,
-    "suiteType": "3",
-    "requirementId": feature_id,
+    "suiteType": "1",
     "parentSuite": {
         "id":plan_root_suite["id"]
         }
