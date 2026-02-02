@@ -84,7 +84,7 @@ def create_feature_suite(plan_id, name,feature_id,plan_root_suite):
 
 def get_or_create_userstory_suite(plan_id, userstory,plan_root_suite):
 
-    suite_name = f"{userstory['System.Title']}"
+    suite_name = f"{userstory["fields"]["System.Title"]}"
 
     suites = get_suites(plan_id)
 
