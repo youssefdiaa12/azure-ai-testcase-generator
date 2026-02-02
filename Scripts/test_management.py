@@ -53,10 +53,10 @@ def get_or_create_feature_suite(plan_id, feature,plan_root_suite):
         if suite["name"] == suite_name:
             return suite["id"]
 
-    return create_feature_suite(plan_id, suite_name,feature['id'],plan_root_suite)
+    return create_feature_suite(plan_id, suite_name,plan_root_suite)
 
 
-def create_feature_suite(plan_id, name,feature_id,plan_root_suite):
+def create_feature_suite(plan_id, name,plan_root_suite):
 
 # GET https://dev.azure.com/{organization}/{project}/_apis/testplan/Plans/{planId}/suites?api-version=7.1
 # POST https://dev.azure.com{organization}/{project}/_apis/testplan/Plans/{planId}/Suites?api-version=7.1
@@ -66,7 +66,7 @@ def create_feature_suite(plan_id, name,feature_id,plan_root_suite):
 
     body= {
     "name": name,
-    "suiteType": "1",
+    "suiteType": "2", #Static Query
     "parentSuite": {
         "id":plan_root_suite["id"]
         }
