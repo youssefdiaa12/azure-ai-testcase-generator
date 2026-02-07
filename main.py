@@ -20,16 +20,22 @@ for story in stories:
 
     feature, epic = get_feature_and_epic(raw_story)
 
+    if not feature:
+        print("Story missing feature hierarchy")
+        continue
+
     if not epic:
         print("Story missing epic hierarchy")
         continue
 
     plan_id,plan_root_suite = get_or_create_test_plan(epic)
     feature_suite_id = get_or_create_feature_suite(plan_id, feature,plan_root_suite)
-    userstory_suite_id=get_or_create_userstory_suite(plan_id,raw_story,feature_suite_id) 
+    userstory_suite_id=get_or_create_userstory_suite(plan_id,raw_story,feature_suite_id)
+    if userstory_suite_id == -1:
+        print("the user story test plan already exists and it has test cases generated")
+        continue
 
 
 #story['id']
     ai_tests = generate_test_cases(story)
-    print("ai test response is "+str(ai_tests))
     create_test_cases(story, ai_tests, plan_id, userstory_suite_id)

@@ -45,7 +45,7 @@ def create_test_plan(name):
 # Additional functions for test suite and test case management can be added here.
 def get_or_create_feature_suite(plan_id, feature,plan_root_suite):
 
-    suite_name = f"FEATURE-{feature['id']} - {feature['fields']['System.Title']}"
+    suite_name = f"FEATURE - {feature['fields']['System.Title']}"
 
     suites = get_suites(plan_id)
 
@@ -88,7 +88,7 @@ def get_or_create_userstory_suite(plan_id, userstory,plan_root_suite):
 
     for suite in suites:
         if suite["name"] == suite_name:
-            return suite["id"]
+            return -1
 
     return create_userstory_suite(plan_id, suite_name,userstory['id'],plan_root_suite)
 
