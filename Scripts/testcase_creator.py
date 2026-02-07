@@ -15,9 +15,6 @@ ASSIGNED_TO = os.getenv("AZURE_EMAIL")
 AUTH = ("", PAT or "")
 
 BASE_WIT_URL = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/wit"
-# Kept for completeness (not used for suite-link anymore)
-BASE_TEST_URL = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/test"
-# Newer test plan endpoint for adding to suite
 BASE_TESTPLAN_URL = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/testplan"
 
 
@@ -32,14 +29,12 @@ def create_test_cases(story: Dict[str, Any], tests_json: Any, plan_id: int, suit
     - Links them to user story
     """
 
-    # Normalize AI output "collection" shape — allow:
-    #   - flat list of test cases
-    #   - dict with positive/negative(/edge) keys
+    # Normalize AI output - allow flat list or dict with type keys
     if isinstance(tests_json, list):
         all_cases = tests_json
     elif isinstance(tests_json, dict):
         all_cases = []
-        for key in ("positive", "negative", "edge", "security"):
+        for key in ("positive", "negative", "edge"):
             if key in tests_json and isinstance(tests_json[key], list):
                 all_cases.extend(tests_json[key])
     else:
@@ -51,15 +46,14 @@ def create_test_cases(story: Dict[str, Any], tests_json: Any, plan_id: int, suit
 
     for idx, tc in enumerate(all_cases, start=1):
         try:
-            # Basic shape check for better diagnostics
             if not isinstance(tc, dict):
-                raise ValueError(f"Test case #{idx} is not an object: {type(tc)} -> {tc!r}")
+                raise ValueError(f"Test case #{idx} is not an object: {type(tc)}")
 
             test_case_id = create_test_case_work_item(tc)
             if test_case_id:
                 link_test_to_suite(test_case_id, plan_id, suite_id)
                 link_test_case_to_story(test_case_id, story["id"])
-                print(f"Created and linked test case #{idx}: ID {test_case_id}")
+                print(f"Created test case #{idx}: ID {test_case_id}")
         except Exception as e:
             print(f"Failed creating test case #{idx}: {e}\nPayload:\n{json.dumps(tc, indent=2, ensure_ascii=False)}")
 
@@ -70,23 +64,17 @@ def create_test_cases(story: Dict[str, Any], tests_json: Any, plan_id: int, suit
 def create_test_case_work_item(test_case: Dict[str, Any]) -> int:
     """
     Creates Azure DevOps Test Case Work Item.
-    - Normalizes steps/expected to safe string pairs
-    - Writes Microsoft.VSTS.TCM.Steps XML
     """
-
     title = _to_str(test_case.get("title", "AI Generated Test Case"))
-    priority = test_case.get("priority", "medium")  # Default to medium if not provided
     test_type = test_case.get("type", "positive")
-    
-    # Handle both old format (without priority) and new format (with priority)
-    pairs = normalize_to_pairs(test_case)  # [(action, expected), ...]
+    pairs = normalize_to_pairs(test_case)
     steps_xml = build_test_steps_xml_from_pairs(pairs)
 
     patch_document = [
         {"op": "add", "path": "/fields/System.Title", "value": title},
         {"op": "add", "path": "/fields/System.AssignedTo", "value": ASSIGNED_TO or ""},
         {"op": "add", "path": "/fields/Microsoft.VSTS.TCM.Steps", "value": steps_xml},
-        {"op": "add", "path": "/fields/System.Tags", "value": f"AI_Generated;{test_type};priority_{priority}"},
+        {"op": "add", "path": "/fields/System.Tags", "value": f"AI_Generated;{test_type}"},
     ]
 
     url = f"{BASE_WIT_URL}/workitems/$Test%20Case?api-version=7.0"
@@ -110,14 +98,12 @@ def create_test_case_work_item(test_case: Dict[str, Any]) -> int:
 def build_test_steps_xml_from_pairs(pairs: List[Tuple[str, str]]) -> str:
     """
     Builds the XML expected by Microsoft.VSTS.TCM.Steps.
-    Use *raw XML tags* (<steps>, <step>, <parameterizedString>), and escape only inner text.
     """
-
     if not pairs:
         pairs = [("No steps provided", "")]
 
     xml_parts = []
-    last_id = len(pairs)  # 1..N works in practice for step ids
+    last_id = len(pairs)
     xml_parts.append(f'<steps id="0" last="{last_id}">')
 
     for i, (action, expected) in enumerate(pairs, start=1):
@@ -137,12 +123,11 @@ def build_test_steps_xml_from_pairs(pairs: List[Tuple[str, str]]) -> str:
 
 
 # ================================
-# LINK TEST CASE TO TEST SUITE (modern endpoint)
+# LINK TEST CASE TO TEST SUITE
 # ================================
 def link_test_to_suite(test_case_id: int, plan_id: int, suite_id: int):
     """
-    Adds a test case to a suite using the 'testplan' REST API.
-    This is the newer, supported route.
+    Adds a test case to a suite using the testplan REST API.
     """
     url = f"{BASE_TESTPLAN_URL}/Plans/{plan_id}/Suites/{suite_id}/TestCase?api-version=7.1"
     payload = {"workItemIds": [test_case_id]}
@@ -196,7 +181,6 @@ def link_test_case_to_story(test_case_id: int, story_id: int):
 def _to_str(x: Any) -> str:
     """
     Convert any value into a single-line string representation.
-    Avoids non-string surprises when escaping for XML.
     """
     if x is None:
         return ""
@@ -205,7 +189,6 @@ def _to_str(x: Any) -> str:
     if isinstance(x, list):
         return " ".join(_to_str(i) for i in x if i is not None)
     if isinstance(x, dict):
-        # Common keys the AI might use
         for k in ("text", "title", "action", "step", "description", "value"):
             if k in x:
                 return _to_str(x[k])
@@ -215,11 +198,7 @@ def _to_str(x: Any) -> str:
 
 def normalize_to_pairs(test_case: Dict[str, Any]) -> List[Tuple[str, str]]:
     """
-    Produce [(action, expected), ...] robustly from a single test_case dict.
-    Accept these shapes:
-      - steps: [ "Click X", "Click Y" ], expected: "Z appears"
-      - steps: [ {"action": "...", "expected": "..."}, {"action": "..."} ], expected: "default"
-      - steps: "Single line" (coerced to [ "Single line" ])
+    Produce [(action, expected), ...] from a single test_case dict.
     """
     default_expected = _to_str(test_case.get("expected", ""))
     steps = test_case.get("steps", [])
