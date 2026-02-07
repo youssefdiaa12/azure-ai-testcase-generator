@@ -39,7 +39,7 @@ def create_test_cases(story: Dict[str, Any], tests_json: Any, plan_id: int, suit
         all_cases = tests_json
     elif isinstance(tests_json, dict):
         all_cases = []
-        for key in ("positive", "negative", "edge"):
+        for key in ("positive", "negative", "edge", "security"):
             if key in tests_json and isinstance(tests_json[key], list):
                 all_cases.extend(tests_json[key])
     else:
@@ -75,6 +75,10 @@ def create_test_case_work_item(test_case: Dict[str, Any]) -> int:
     """
 
     title = _to_str(test_case.get("title", "AI Generated Test Case"))
+    priority = test_case.get("priority", "medium")  # Default to medium if not provided
+    test_type = test_case.get("type", "positive")
+    
+    # Handle both old format (without priority) and new format (with priority)
     pairs = normalize_to_pairs(test_case)  # [(action, expected), ...]
     steps_xml = build_test_steps_xml_from_pairs(pairs)
 
@@ -82,7 +86,7 @@ def create_test_case_work_item(test_case: Dict[str, Any]) -> int:
         {"op": "add", "path": "/fields/System.Title", "value": title},
         {"op": "add", "path": "/fields/System.AssignedTo", "value": ASSIGNED_TO or ""},
         {"op": "add", "path": "/fields/Microsoft.VSTS.TCM.Steps", "value": steps_xml},
-        {"op": "add", "path": "/fields/System.Tags", "value": "AI_Generated"},
+        {"op": "add", "path": "/fields/System.Tags", "value": f"AI_Generated;{test_type};priority_{priority}"},
     ]
 
     url = f"{BASE_WIT_URL}/workitems/$Test%20Case?api-version=7.0"
