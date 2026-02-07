@@ -10,7 +10,9 @@ def clean_acceptance_criteria(text: str) -> str:
     if not text:
         return ""
     text = html.unescape(text)
-    text = text.replace("“", '"').replace("”", '"').replace("’", "'")
+    # Use ASCII-friendly quote replacements
+    text = text.replace(chr(8216), "'").replace(chr(8217), "'")
+    text = text.replace(chr(8220), '"').replace(chr(8221), '"')
     text = re.sub(r'"([^"]+)"', r'\1', text)
     text = re.sub(r'\s+', ' ', text).strip()
     return text
@@ -25,16 +27,59 @@ def format_acceptance_for_prompt(text: str) -> str:
     return out
 
 def extract_json(text):
-    match = re.search(r"```json(.*?)```", text, re.DOTALL)
-    if match:
-        cleaned = match.group(1).strip()
-    else:
-        match = re.search(r"(\[.*\])", text, re.DOTALL)
-        if not match:
-            raise ValueError("No JSON returned by Gemini.")
-        cleaned = match.group(1)
-    cleaned = cleaned.replace(",]", "]").replace(",}", "}")
-    return json.loads(cleaned)
+    """Extract and parse JSON from Gemini response with robust error handling."""
+    print(f"DEBUG: Raw AI response length: {len(text)} chars")
+    print(f"DEBUG: First 500 chars: {text[:500]}")
+    print(f"DEBUG: Last 500 chars: {text[-500:]}")
+    
+    # Try multiple extraction patterns
+    patterns = [
+        (r"```json\s*(\[[\s\S]*?\])\s*```", "json-markdown"),
+        (r"```\s*(\[[\s\S]*?\])\s*```", "json-backtick"),
+        (r"\[\s*\{[\s\S]*?\}[\s\S]*?\]", "json-array"),
+        (r"(\[\{[\s\S]*?\}\])", "json-curly"),
+    ]
+    
+    for pattern, pattern_name in patterns:
+        match = re.search(pattern, text, re.DOTALL | re.IGNORECASE)
+        if match:
+            cleaned = match.group(1).strip()
+            print(f"DEBUG: Extracted JSON using {pattern_name}, length: {len(cleaned)}")
+            
+            # Fix common JSON issues
+            cleaned = _fix_json(cleaned)
+            
+            try:
+                return json.loads(cleaned)
+            except json.JSONDecodeError as e:
+                print(f"DEBUG: JSON decode failed with {pattern_name}: {e}")
+                continue
+    
+    # Last resort: try to find any JSON-like structure
+    raise ValueError(f"Could not extract valid JSON from response. Response preview: {text[:500]}")
+
+
+def _fix_json(json_str):
+    """Fix common JSON formatting issues."""
+    if not json_str:
+        return json_str
+    
+    # Remove trailing commas before } or ]
+    json_str = re.sub(r',(\s*[}\]])', r'\1', json_str)
+    
+    # Fix unquoted keys (basic pattern)
+    json_str = re.sub(r'(\w+):', r'"\1":', json_str)
+    
+    # Remove any markdown or text before/after
+    json_str = json_str.strip()
+    
+    # Try to balance brackets if incomplete
+    if json_str.count('[') > json_str.count(']'):
+        json_str = json_str + ']' * (json_str.count('[') - json_str.count(']'))
+    if json_str.count('{') > json_str.count('}'):
+        json_str = json_str + '}' * (json_str.count('{') - json_str.count('}'))
+    
+    return json_str
 
 def generate_test_cases(story):
     cleaned = clean_acceptance_criteria(story["acceptance"])
@@ -107,14 +152,13 @@ For each user story, you MUST generate test cases from these categories:
 
 ### 2. COMPREHENSIVE TEST CASE STRUCTURE:
 Each test case MUST include:
-- title: Descriptive name starting with action (e.g., "Verify user can...", "Validate that...", "Ensure... fails when...")
+- title: Descriptive name starting with action
 - type: "positive" | "negative" | "edge"
 - steps: Sequential, numbered plain text steps
 - expected: Clear, specific assertion
 - priority: "high" | "medium" | "low" (based on business impact)
 
 ### 3. EXAMPLE OUTPUT FORMAT (MUST FOLLOW EXACTLY):
-```json
 [
   {{
     "title": "User successfully logs in with valid credentials",
@@ -151,60 +195,21 @@ Each test case MUST include:
       "Click Sign In button"
     ],
     "expected": "Error message 'Email is required' displays below field"
-  }},
-  {{
-    "title": "Login fails when password exceeds maximum length",
-    "type": "edge",
-    "priority": "medium",
-    "steps": [
-      "Navigate to login page",
-      "Enter valid email",
-      "Enter password longer than 128 characters",
-      "Click Sign In button"
-    ],
-    "expected": "Form validation prevents submission, error message about max length"
-  }},
-  {{
-    "title": "SQL injection attempt in email field",
-    "type": "security",
-    "priority": "high",
-    "steps": [
-      "Navigate to login page",
-      "Enter email: \"' OR '1'='1\"--\"",
-      "Enter any password",
-      "Click Sign In button"
-    ],
-    "expected": "Input sanitized, error message displays, no database access"
-  }},
-  {{
-    "title": "User cannot login with correct credentials after session timeout",
-    "type": "edge",
-    "priority": "medium",
-    "steps": [
-      "Login with valid credentials",
-      "Wait for session timeout (30 minutes)",
-      "Attempt to access protected page",
-      "Observe system response"
-    ],
-    "expected": "User redirected to login page, appropriate timeout message displays"
   }}
 ]
-```
 
 ### 4. QUANTITY GUIDELINES:
 - Positive cases: Minimum 2-3
-- Negative cases: Minimum 4-6 (covering major validation rules)
-- Edge cases: Minimum 5-8 (covering boundaries, nulls, special chars)
+- Negative cases: Minimum 4-6
+- Edge cases: Minimum 5-8
 - TOTAL: Aim for 12-20+ test cases depending on story complexity
 
 ### 5. TESTING BEST PRACTICES TO FOLLOW:
-- Use realistic, meaningful test data (not 'test123' for everything)
+- Use realistic, meaningful test data
 - Include both valid and invalid variations of each input
-- Test field interactions (how fields affect each other)
+- Test field interactions
 - Consider system state before each test
-- Include cleanup steps if tests modify persistent data
-- Test error messages are user-friendly and actionable
-- Consider accessibility (keyboard navigation, screen readers){field_hint}
+- Test error messages are user-friendly{field_hint}
 
 ## ACCEPTANCE CRITERIA TO TEST:
 {formatted}
@@ -214,7 +219,6 @@ Each test case MUST include:
 2. Each test case MUST have: title, type, priority, steps[], expected
 3. Cover all edge case categories mentioned above
 4. Use realistic, diverse test data
-5. Ensure steps are numbered and sequential
 """
 
     url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={API_KEY}"
