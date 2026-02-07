@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Test Case Generator - Project Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(90deg, #00d4ff, #7b2cbf);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #a0a0a0;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #00d4ff;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        h2 .icon {
+            font-size: 1.5rem;
+        }
+
+        .intro-text {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        /* Tree Diagram Styles */
+        .tree-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .tree {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .tree-level {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 10px 0;
+        }
+
+        .tree-node {
+            padding: 20px 30px;
+            border-radius: 15px;
+            text-align: center;
+            min-width: 180px;
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .tree-node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .tree-node .icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .tree-node .label {
+            font-weight: bold;
+            font-size: 1.1rem;
+            margin-bottom: 5px;
+        }
+
+        .tree-node .arrow {
+            color: #7b2cbf;
+            font-size: 1.5rem;
+            margin: 5px 0;
+        }
+
+        /* Epic Node */
+        .epic {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        /* Feature Node */
+        .feature {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+
+        /* User Story Node */
+        .user-story {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+
+        /* Test Case Node */
+        .test-case {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: #1a1a2e;
+            font-size: 0.9rem;
+        }
+
+        .arrow-down {
+            font-size: 2rem;
+            color: #7b2cbf;
+            margin: 10px 0;
+        }
+
+        /* Connection Lines */
+        .connection-line {
+            width: 2px;
+            height: 30px;
+            background: #7b2cbf;
+            margin: 0 auto;
+        }
+
+        /* Flow Steps */
+        .flow-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .flow-step {
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 12px;
+            padding: 25px;
+            flex: 1;
+            min-width: 250px;
+            max-width: 300px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .flow-step:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+        }
+
+        .flow-step .step-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .flow-step h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+            font-size: 1.1rem;
+        }
+
+        .flow-step p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        /* Benefits Grid */
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .benefit-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .benefit-card .benefit-icon {
+            font-size: 2rem;
+            margin-bottom: 15px;
+        }
+
+        .benefit-card h3 {
+            color: #00d4ff;
+            margin-bottom: 10px;
+        }
+
+        .benefit-card p {
+            color: #a0a0a0;
+            font-size: 0.9rem;
+        }
+
+        /* Tech Stack */
+        .tech-stack {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .tech-badge {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            color: white;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+
+            .tree-node {
+                min-width: 150px;
+                padding: 15px 20px;
+            }
+
+            .flow-step {
+                min-width: 100%;
+            }
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .section:nth-child(2) {
+            animation-delay: 0.1s;
+        }
+
+        .section:nth-child(3) {
+            animation-delay: 0.2s;
+        }
+
+        .section:nth-child(4) {
+            animation-delay: 0.3s;
+        }
+
+        .section:nth-child(5) {
+            animation-delay: 0.4s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🤖 AI Test Case Generator</h1>
+            <p class="subtitle">Automated Test Case Generation for Azure DevOps</p>
+        </header>
+
+        <!-- What This Project Does -->
+        <section class="section">
+            <h2><span class="icon">🎯</span> What This Project Does</h2>
+            <p class="intro-text">
+                This project is an <strong>AI-powered test case generator</strong> that automatically creates high-quality 
+                manual test cases for your User Stories and publishes them directly to <strong>Azure DevOps Test Plans</strong>.
+            </p>
+            <p class="intro-text">
+                Simply write your User Stories with acceptance criteria in Azure Boards, and let 
+                <strong>Gemini AI</strong> generate comprehensive test cases for you automatically!
+            </p>
+        </section>
+
+        <!-- Tree Diagram -->
+        <section class="section">
+            <h2><span class="icon">🌳</span> Project Hierarchy Tree</h2>
+            <p class="intro-text">
+                The system automatically maps your Azure DevOps work items to test artifacts:
+            </p>
+            
+            <div class="tree-container">
+                <div class="tree">
+                    <!-- Epic Level -->
+                    <div class="tree-level">
+                        <div class="tree-node epic">
+                            <div class="icon">📦</div>
+                            <div class="label">EPIC</div>
+                            <div style="font-size: 0.85rem;">Large initiative</div>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-line"></div>
+                    <div class="arrow-down">⬇️ Maps to ⬇️</div>
+                    
+                    <!-- Feature Level -->
+                    <div class="tree-level">
+                        <div class="tree-node feature">
+                            <div class="icon">⚡</div>
+                            <div class="label">FEATURE</div>
+                            <div style="font-size: 0.85rem;">Specific functionality</div>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-line"></div>
+                    <div class="arrow-down">⬇️ Maps to ⬇️</div>
+                    
+                    <!-- User Story Level -->
+                    <div class="tree-level">
+                        <div class="tree-node user-story">
+                            <div class="icon">📝</div>
+                            <div class="label">USER STORY</div>
+                            <div style="font-size: 0.85rem;">User requirement</div>
+                        </div>
+                    </div>
+                    
+                    <div class="connection-line"></div>
+                    <div class="arrow-down">⬇️ Generates ⬇️</div>
+                    
+                    <!-- Test Cases Level -->
+                    <div class="tree-level">
+                        <div class="tree-node test-case">
+                            <div class="icon">✅</div>
+                            <div class="label">Test Cases</div>
+                            <div style="font-size: 0.85rem;">AI-generated tests</div>
+                        </div>
+                        <div class="tree-node test-case">
+                            <div class="icon">❌</div>
+                            <div class="label">Negative Tests</div>
+                            <div style="font-size: 0.85rem;">Error scenarios</div>
+                        </div>
+                        <div class="tree-node test-case">
+                            <div class="icon">⚠️</div>
+                            <div class="label">Edge Cases</div>
+                            <div style="font-size: 0.85rem;">Boundary tests</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alternative View: Work Item → Test Artifact Table -->
+            <div style="margin-top: 40px;">
+                <h3 style="color: #00d4ff; margin-bottom: 15px;">📋 Quick Reference</h3>
+                <table style="width: 100%; border-collapse: collapse; background: rgba(0,0,0,0.2); border-radius: 10px; overflow: hidden;">
+                    <thead>
+                        <tr style="background: rgba(102, 126, 234, 0.3);">
+                            <th style="padding: 15px; text-align: left;">Work Item Type</th>
+                            <th style="padding: 15px; text-align: left;">Test Artifact</th>
+                            <th style="padding: 15px; text-align: left;">Azure Location</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 15px;">📦 Epic</td>
+                            <td style="padding: 15px;">🧪 Test Plan</td>
+                            <td style="padding: 15px;">Test Plans → Test Plan</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+                            <td style="padding: 15px;">⚡ Feature</td>
+                            <td style="padding: 15px;">📁 Test Suite</td>
+                            <td style="padding: 15px;">Test Plans → Suite</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 15px;">📝 User Story</td>
+                            <td style="padding: 15px;">✅ Test Cases</td>
+                            <td style="padding: 15px;">Test Plans → Suite → Cases</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- How It Works -->
+        <section class="section">
+            <h2><span class="icon">🔄</span> How It Works</h2>
+            <div class="flow-container">
+                <div class="flow-step">
+                    <div class="step-icon">1️⃣</div>
+                    <h3>Fetch User Stories</h3>
+                    <p>Pipeline queries Azure Boards for new User Stories with acceptance criteria</p>
+                </div>
+                <div class="flow-step">
+                    <div class="step-icon">2️⃣</div>
+                    <h3>Build Hierarchy</h3>
+                    <p>Identify parent Epic and Feature to create proper test structure</p>
+                </div>
+                <div class="flow-step">
+                    <div class="step-icon">3️⃣</div>
+                    <h3>Generate Test Plans</h3>
+                    <p>Create Test Plans and Suites matching your work item hierarchy</p>
+                </div>
+                <div class="flow-step">
+                    <div class="step-icon">4️⃣</div>
+                    <h3>AI Generation</h3>
+                    <p>Send acceptance criteria to Gemini AI for intelligent test case creation</p>
+                </div>
+                <div class="flow-step">
+                    <div class="step-icon">5️⃣</div>
+                    <h3>Create & Link</h3>
+                    <p>Publish test cases to Azure DevOps and link back to User Stories</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Key Benefits -->
+        <section class="section">
+            <h2><span class="icon">✨</span> Key Benefits</h2>
+            <div class="benefits-grid">
+                <div class="benefit-card">
+                    <div class="benefit-icon">🤖</div>
+                    <h3>AI-Powered</h3>
+                    <p>Leverage Gemini AI to generate comprehensive test cases from acceptance criteria</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">⚡</div>
+                    <h3>Automation</h3>
+                    <p>Zero manual effort - test cases are created automatically on schedule</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔗</div>
+                    <h3>Full Traceability</h3>
+                    <p>Test cases are linked back to User Stories, Features, and Epics</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📊</div>
+                    <h3>Consistency</h3>
+                    <p>Standardized test structure across all projects and teams</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">🔄</div>
+                    <h3>Real-time Sync</h3>
+                    <p>Always in sync with your Azure Boards work items</p>
+                </div>
+                <div class="benefit-card">
+                    <div class="benefit-icon">📈</div>
+                    <h3>Better Coverage</h3>
+                    <p>Includes positive, negative, and edge case scenarios</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Technology Stack -->
+        <section class="section">
+            <h2><span class="icon">🛠</span> Technology Stack</h2>
+            <div class="tech-stack">
+                <span class="tech-badge">🐍 Python 3.11</span>
+                <span class="tech-badge">☁️ Azure DevOps REST API</span>
+                <span class="tech-badge">🤖 Gemini AI</span>
+                <span class="tech-badge">📋 Azure Test Plans</span>
+                <span class="tech-badge">🔧 Azure Pipelines</span>
+                <span class="tech-badge">📝 WIQL Queries</span>
+                <span class="tech-badge">📄 XML Test Steps</span>
+            </div>
+        </section>
+
+        <!-- Example Flow -->
+        <section class="section">
+            <h2><span class="icon">📖</span> Example: A Complete Flow</h2>
+            <div style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 25px; margin-top: 20px;">
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span style="background: #667eea; padding: 8px 15px; border-radius: 8px; margin-right: 15px;">1</span>
+                    <span><strong>Epic:</strong> "E-Commerce Platform" → Creates <strong>Test Plan</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span style="background: #f093fb; padding: 8px 15px; border-radius: 8px; margin-right: 15px;">2</span>
+                    <span><strong>Feature:</strong> "Shopping Cart" → Creates <strong>Test Suite</strong></span>
+                </div>
+                <div style="display: flex; align-items: center; margin-bottom: 15px;">
+                    <span style="background: #4facfe; padding: 8px 15px; border-radius: 8px; margin-right: 15px;">3</span>
+                    <span><strong>User Story:</strong> "As a user, I can add items to cart" → <strong>AI generates test cases</strong></span>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <span style="background: #43e97b; padding: 8px 15px; border-radius: 8px; margin-right: 15px;">4</span>
+                    <span><strong>Result:</strong> Test Cases created with steps, linked to suite and story</span>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Add smooth scroll behavior
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+
+        // Add intersection observer for animations
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.section').forEach(section => {
+            section.style.opacity = '0';
+            section.style.transform = 'translateY(20px)';
+            section.style.transition = 'all 0.6s ease-out';
+            observer.observe(section);
+        });
+    </script>
+</body>
+</html>
