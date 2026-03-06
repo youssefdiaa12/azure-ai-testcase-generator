@@ -56,8 +56,8 @@ if not any(rel["attributes"].get("name") == "Tested By" for rel in raw_story['re
 
 if regression_suite_id:
     for related_test_case in relevant_test_cases:
-        print("the id is "+str(related_test_case))
-        Add_TC_to_suite(plan_id,regression_suite_id,related_test_case)
+        print("the id is "+str(related_test_case["id"]))
+        Add_TC_to_suite(plan_id,regression_suite_id,related_test_case["id"])
         
 
 
