@@ -155,14 +155,15 @@ def get_suites(plan_id):
 
 def Add_TC_to_suite(plan_id,suite_id,test_case_id):
 
+
     url = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/testplan/Plans/{plan_id}/Suites/{suite_id}/TestCase?api-version=7.0"
     body = [
     {
         "pointAssignments": [],
         "workItem": {
-            "id": {test_case_id}
+            "id": test_case_id
         }
     }
 ]
 
-    res = requests.post(url, json=body, auth=AUTH)
+    requests.post(url, json=body, auth=AUTH)
