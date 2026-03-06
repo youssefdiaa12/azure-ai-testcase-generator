@@ -29,7 +29,7 @@ def get_related_test_cases(work_item,relation_type=None):
     print("the relations are "+str(relations))
     related_test_cases = []
     for rel in relations:
-        if "Hierarchy-Reverse" in rel["rel"]:
+        if "Related" in rel["rel"]:
             #check if the new user story has related old user stories that might be 
             # affected and need regression tests
             if relation_type=="Related":

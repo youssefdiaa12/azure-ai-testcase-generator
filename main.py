@@ -46,7 +46,11 @@ for story in stories:
 
 
 
+
 #story['id']
+
+# check that the user story doesn't have any TC created Yet
+if not any(rel["attributes"].get("name") == "Tested By" for rel in raw_story['relations']):
     ai_tests = generate_test_cases(story)
     create_test_cases(story, ai_tests, plan_id, userstory_suite_id)
 
