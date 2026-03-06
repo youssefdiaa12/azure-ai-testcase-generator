@@ -20,3 +20,5 @@ Thumbs.db
 
 # Secrets
 config_local.py
+
+cred.py
