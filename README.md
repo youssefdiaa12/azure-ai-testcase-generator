@@ -167,3 +167,145 @@ Each generated Test Case appears with:
 *   Works fully from Azure Pipelines with no local execution required
 
 ***
+You mainly need to add **one new section explaining the Regression Test Suite logic**, because your README already explains the AI generation flow well. The new feature is about **test maintenance and regression planning**, not generation.
+
+Below is a **clean section you can append to your README** (in the same style as your document).
+
+---
+
+# 🔁 Automated Regression Test Suite Management
+
+In addition to generating test cases from User Stories, the system now **automatically maintains a Regression Test Suite inside the Test Plan**.
+
+This ensures that **existing functionality potentially affected by new features is always validated during regression cycles.**
+
+---
+
+## 📌 Regression Logic
+
+When a **new User Story** is introduced under a Feature or Epic, it may affect existing functionality already covered by previous test cases.
+
+To ensure system stability, the workflow now supports **linking impacted test cases directly to the new User Story**.
+
+These linked test cases are automatically collected and included in the **Regression Test Suite**.
+
+---
+
+## 🔗 How It Works
+
+### 1️⃣ Link Existing Test Cases to the User Story
+
+Inside **Azure DevOps**, the tester or product owner can link relevant test cases using the **Related** relationship.
+
+Example:
+
+```
+Epic
+ └── Feature
+      └── User Story (New Feature)
+           └── Related → Existing Test Case
+```
+
+These linked test cases represent **areas that could be impacted by the new change**.
+
+---
+
+### 2️⃣ Pipeline Detects Related Test Cases
+
+During execution, the automation:
+
+1. Reads the **User Story relationships**
+2. Detects **linked Test Cases**
+3. Collects them as **regression candidates**
+
+---
+
+### 3️⃣ Add Them to the Regression Suite
+
+The system ensures that a **Regression Test Suite exists inside the Test Plan** for the current iteration or release.
+
+Example structure:
+
+```
+Test Plan (Epic)
+│
+├── Feature Test Suite
+│   └── AI Generated Test Cases
+│
+└── Regression Test Suite
+    └── Impacted Test Cases
+```
+
+If the suite does not exist, it is **created automatically**.
+
+---
+
+### 4️⃣ Automatically Maintain the Regression Suite
+
+The pipeline then:
+
+* Adds all linked test cases to the **Regression Suite**
+* Prevents duplicates
+* Ensures regression coverage grows as the system evolves
+
+---
+
+## 🔄 Updated Automation Flow
+
+The full pipeline now performs the following:
+
+1. Detect new **User Stories**
+2. Generate **AI Test Cases** for the story
+3. Create or update:
+
+   * **Test Plan (Epic)**
+   * **Feature Test Suite**
+4. Detect **Related Test Cases** linked to the story
+5. Add those test cases to the **Regression Test Suite**
+6. Link all generated and related tests correctly
+
+---
+
+## 🧪 Example Scenario
+
+A new feature is added:
+
+```
+Epic: Billing System
+Feature: Refund Handling
+User Story: Support partial refunds
+```
+
+During analysis, the tester identifies existing test cases that could be impacted:
+
+* Refund full payment
+* Cancel payment
+* Payment status update
+
+These existing test cases are linked to the new User Story.
+
+The pipeline will automatically add them to:
+
+```
+Test Plan → Regression Suite
+```
+
+ensuring they are executed in the next **iteration or release regression cycle**.
+
+---
+
+## 🎯 Benefits of This Enhancement
+
+✔ Prevents missing regression coverage
+✔ Automatically grows regression suite over time
+✔ Keeps regression aligned with real system impact
+✔ Reduces manual test plan maintenance
+✔ Ensures safer feature releases
+
+---
+
+💡 **In short:**
+
+The system now supports **both test generation and intelligent regression suite management**, creating a more complete **AI-assisted QA workflow inside Azure DevOps**.
+
+
