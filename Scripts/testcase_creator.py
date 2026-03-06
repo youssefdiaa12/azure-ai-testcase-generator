@@ -53,7 +53,6 @@ def create_test_cases(story: Dict[str, Any], tests_json: Any, plan_id: int, suit
             if test_case_id:
                 link_test_to_suite(test_case_id, plan_id, suite_id)
                 link_test_case_to_story(test_case_id, story["id"])
-                print(f"Created test case #{idx}: ID {test_case_id}")
         except Exception as e:
             print(f"Failed creating test case #{idx}: {e}\nPayload:\n{json.dumps(tc, indent=2, ensure_ascii=False)}")
 

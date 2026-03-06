@@ -29,7 +29,9 @@ for story in stories:
         print("Story missing epic hierarchy")
         continue
 
-    relevant_test_cases.append(get_related_test_cases(raw_story, relation_type="Related"))
+    tc_ids=(get_related_test_cases(raw_story, relation_type="Related"))
+    if tc_ids:
+        relevant_test_cases.extend(tc_ids)
     print("the related tc size is "+ str(len(relevant_test_cases)))
 
     plan_id,plan_root_suite = get_or_create_test_plan(epic)
