@@ -30,7 +30,7 @@ for story in stories:
         continue
 
     relevant_test_cases.append(get_related_test_cases(raw_story, relation_type="Related"))
-    print("the related tc size is "+ len(relevant_test_cases))
+    print("the related tc size is "+ str(len(relevant_test_cases)))
 
     plan_id,plan_root_suite = get_or_create_test_plan(epic)
     feature_suite_id = get_or_create_feature_suite(plan_id, feature,plan_root_suite)
