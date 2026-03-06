@@ -43,7 +43,7 @@ for story in stories:
         continue
 
     regression_suite_id = create_regression_suite(plan_id,plan_root_suite)
-    print("the regression suite id is "+str(regression_suite_id))
+    print("the regression suite id "+str(regression_suite_id))
 
 
 
