@@ -26,6 +26,7 @@ def get_parent(work_item,work_item_type=None):
 def get_related_test_cases(work_item,relation_type=None):
 
     relations = work_item.get("relations", [])
+    print("the relations are "+str(relations))
     related_test_cases = []
     for rel in relations:
         if "Hierarchy-Reverse" in rel["rel"]:
@@ -34,8 +35,9 @@ def get_related_test_cases(work_item,relation_type=None):
             if relation_type=="Related":
                 parent_url = rel["url"]
                 related_id = parent_url.split("/")[-1]
+                print("the related id is "+str(related_id))
                 related_item_id = get_work_item_raw(related_id)
-                if related_item_id["fields"]["System.WorkItemType"]=="Test Case":
+                if related_item_id["fields"]["System.WorkItemType"]== "Test Case":
                     print("the tc id related is found and it's id is "+str(related_item_id))
                     related_test_cases.append(related_item_id)
         
