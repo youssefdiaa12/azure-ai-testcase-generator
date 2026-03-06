@@ -64,8 +64,8 @@ def generate_test_cases(story):
     prompt = f"""
 Generate 8-12 manual test cases for this user story. Include:
 
-**Positive (2-3):** Happy path scenarios
-**Negative (3-4):** Validation failures, invalid inputs
+**Positive (2-8):** Happy path scenarios
+**Negative (3-6):** Validation failures, invalid inputs
 **Edge (3-5):** Empty values, boundaries, special chars{field_hint}
 
 Return ONLY this JSON format (no markdown, no explanations):

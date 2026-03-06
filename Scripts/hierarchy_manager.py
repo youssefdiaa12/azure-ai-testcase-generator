@@ -23,6 +23,24 @@ def get_parent(work_item,work_item_type=None):
 
     return None
 
+def get_related_test_cases(work_item,relation_type=None):
+
+    relations = work_item.get("relations", [])
+    related_test_cases = []
+    for rel in relations:
+        if "Hierarchy-Reverse" in rel["rel"]:
+            #check if the new user story has related old user stories that might be 
+            # affected and need regression tests
+            if relation_type=="Related":
+                parent_url = rel["url"]
+                related_id = parent_url.split("/")[-1]
+                related_item_id = get_work_item_raw(related_id)
+                if related_item_id["fields"]["System.WorkItemType"]=="Test Case":
+                    related_test_cases.append(related_item_id)
+        
+
+    return related_test_cases
+
 
 def get_feature_and_epic(story):
 

@@ -31,6 +31,14 @@ def get_all_test_plans():
     return res.json()["value"]
 
 
+def get_test_plan_by_ID(ID):
+    url = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/testplan/plans/{ID}?api-version=7.0"
+
+    res = requests.get(url, auth=AUTH)
+
+    return res.json()
+
+
 def create_test_plan(name):
 
     url = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/testplan/plans?api-version=7.0"
@@ -53,10 +61,24 @@ def get_or_create_feature_suite(plan_id, feature,plan_root_suite):
         if suite["name"] == suite_name:
             return suite["id"]
 
-    return create_feature_suite(plan_id, suite_name,plan_root_suite)
+    return create_static_suite(plan_id, suite_name,plan_root_suite)
 
 
-def create_feature_suite(plan_id, name,plan_root_suite):
+
+def create_regression_suite(plan_id,plan_root_suite):
+
+    suite_name = f"Regression "
+
+    suites = get_suites(plan_id)
+
+    for suite in suites:
+        if suite["name"] == suite_name:
+            return suite["id"]
+
+    return create_static_suite(plan_id, suite_name,plan_root_suite)
+
+
+def create_static_suite(plan_id, name,plan_root_suite):
 
 # GET https://dev.azure.com/{organization}/{project}/_apis/testplan/Plans/{planId}/suites?api-version=7.1
 # POST https://dev.azure.com{organization}/{project}/_apis/testplan/Plans/{planId}/Suites?api-version=7.1
@@ -129,3 +151,18 @@ def get_suites(plan_id):
     res = requests.get(url, auth=AUTH)
 
     return res.json()["value"]
+
+
+def Add_TC_to_suite(plan_id,suite_id,test_case_id):
+
+    url = f"https://dev.azure.com/{ORG}/{PROJECT}/_apis/testplan/Plans/{plan_id}/Suites/{suite_id}/TestCase?api-version=7.0"
+    body = [
+    {
+        "pointAssignments": [],
+        "workItem": {
+            "id": {test_case_id}
+        }
+    }
+]
+
+    res = requests.post(url, json=body, auth=AUTH)
