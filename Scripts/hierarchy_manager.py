@@ -36,6 +36,7 @@ def get_related_test_cases(work_item,relation_type=None):
                 related_id = parent_url.split("/")[-1]
                 related_item_id = get_work_item_raw(related_id)
                 if related_item_id["fields"]["System.WorkItemType"]=="Test Case":
+                    print("the tc id related is found and it's id is "+str(related_item_id))
                     related_test_cases.append(related_item_id)
         
 

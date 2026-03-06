@@ -67,7 +67,7 @@ def get_or_create_feature_suite(plan_id, feature,plan_root_suite):
 
 def create_regression_suite(plan_id,plan_root_suite):
 
-    suite_name = f"Regression "
+    suite_name = "Regression"
 
     suites = get_suites(plan_id)
 
