@@ -30,7 +30,8 @@ for story in stories:
         continue
 
     tc_ids=(get_related_test_cases(raw_story, relation_type="Related"))
-    if tc_ids:
+    print("the tc size is "+ str(len(tc_ids)))
+    if len(tc_ids)>0:
         relevant_test_cases.extend(tc_ids)
     print("the related tc size is "+ str(len(relevant_test_cases)))
 
@@ -48,11 +49,6 @@ for story in stories:
 #story['id']
     ai_tests = generate_test_cases(story)
     create_test_cases(story, ai_tests, plan_id, userstory_suite_id)
-
-
-
-
-
 
 if regression_suite_id:
     for related_test_case in relevant_test_cases:
